@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug C++ GLUT",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/mi_programa",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build C++ GLUT"
+    }
+  ]
+}

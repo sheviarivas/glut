@@ -1,0 +1,45 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build GLUT",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-o",
+                "mi_programa",
+                "mi_programa.cpp",
+                "-lGL",
+                "-lGLU",
+                "-lglut"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Run GLUT",
+            "type": "shell",
+            "command": "./mi_programa",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Build and Run",
+            "dependsOn": [
+                "Build GLUT"
+            ],
+            "dependsOrder": "sequence",
+            "command": "./mi_programa",
+            "type": "shell",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}
