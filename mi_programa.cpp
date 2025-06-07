@@ -2,11 +2,15 @@
 #include <GL/freeglut.h>
 #include <utility>
 
+using std::string;
+
 float ballX = 0.0f;
 float ballSpeed = 0.01f;
 
 float cellSize = 0.1f;
 float z_depth = -0.0f;
+int windowWidth = 1000;
+int windowHeight = 1000;
 
 // std::pair<float, float> origin = std::make_pair(0.0f, 0.0f); // origen de coordenadas
 std::pair<float, float> origin = std::make_pair(-0.8f, -0.8f); // origen de coordenadas
@@ -41,14 +45,36 @@ void idleFunc() {
     glutPostRedisplay();  // Solicita redibujar la ventana
 }
 
-void renderBitmapString(float x, float y, void* font, const char* string) {
+int getBitmapStringWidth(void* font, string string) {
+    int width = 0;
+    for (char c : string){
+        width += glutBitmapWidth(font, c);
+    }
+    // for (const char* c = string; *c != '\0'; c++) {
+    //     width += glutBitmapWidth(font, *c);
+    // }
+    return width;
+}
+
+void renderBitmapString(float x, float y, void* font, string string) {
     glPushMatrix();
     transformCoordinates(x, y);
 
-    glColor3f(1.0f, 1.0f, 1.0f);  // blanco
-    glRasterPos2f(0.0f, 0.0f);  // Establece la posición donde comienza el texto
-    for (const char* c = string; *c != '\0'; c++) {
-        glutBitmapCharacter(font, *c);
+    // Obtiene el ancho del texto en píxeles
+    int textWidthPixels = getBitmapStringWidth(font, string);
+
+    // Ajuste aproximado: asume que cada 100 píxeles es aproximadamente una celda
+    // Ajusta 100.0f según la resolución y tamaño de tu ventana y fuente
+    float pixelsPerCell = 50.0f;
+    float textWidthUnits = (textWidthPixels / pixelsPerCell) * cellSize;
+
+    glColor3f(1.0f, 1.0f, 1.0f); 
+
+    // Centra horizontalmente
+    glRasterPos2f(-textWidthUnits / 2.0f, 0.0f);
+
+    for (char c : string){
+        glutBitmapCharacter(font, c);
     }
 
     glPopMatrix();
@@ -82,8 +108,33 @@ void drawCircle(float x, float y, float radius, float r, float g, float b, float
 }
 
 void drawAgent(float x, float y, float radius = cellSize/2, float sightRadius= cellSize){
+    int id = -1;
+    string string = std::to_string(id);
     drawCircle(x, y, sightRadius, 0.0f, 0.0f, 0.0f, 0.5f);
-    drawCircle(x, y, radius, 1.0f, 1.0f, 0.0f, 1.0f);
+    drawCircle(x, y, radius,      1.0f, 0.5f, 0.0f, 1.0f);
+    renderBitmapString(x, y, GLUT_BITMAP_HELVETICA_18, string);
+    // renderBitmapString()
+}
+
+void drawLine(float initX, float initY, float finalX, float finalY){
+    glPushMatrix();
+
+    transformCoordinates(initX, initY);
+    transformCoordinates(finalX, finalY);
+
+    glColor3f(1.0f, 0.0f, 0.0f); // rojo
+    glLineWidth(20.0f); // línea de 5 píxeles de grosor
+
+    glBegin(GL_LINES);
+        glVertex2f(-0.5f, -0.5f);
+        glVertex2f(0.5f, 0.5f);
+    glEnd();
+
+    glPopMatrix();
+}
+
+void drawGrid(){
+
 }
 
 void display() {
@@ -100,20 +151,18 @@ void display() {
     drawAgent(ballX, 0.0f);
     drawAgent(ballX, 1.0f);
     drawAgent(ballX, 2.0f);
-    renderBitmapString(ballX, 0.0f, GLUT_BITMAP_HELVETICA_18, "¡Hola, mundo!");
-    renderBitmapString(ballX, 1.0f, GLUT_BITMAP_HELVETICA_18, "¡Hola, mundo!");
-    renderBitmapString(ballX, 2.0f, GLUT_BITMAP_HELVETICA_18, "¡Hola, mundo!");
-
+    drawLine(0.0f, 0.0f, 0.0f, 0.0f);
     
     glDisable(GL_BLEND);  // Desactivar el blending
 
     glutSwapBuffers(); 
 }
 
+// TO DO: ENABLE DEPTH
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(1000, 1000);
+    glutInitWindowSize(windowWidth, windowHeight);
     if(true){
         glutCreateWindow("ORCA");
     }else{
