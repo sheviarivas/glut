@@ -1,22 +1,27 @@
 #include <iostream>
 #include <GL/freeglut.h>
 #include <utility>
+#include <iostream>
 
 using std::string;
 
 float ballX = 0.0f;
-float ballSpeed = 0.01f;
+float ballSpeed = 0.02f;
 
-float cellSize = 0.1f;
+float cellSize = 0.05f;
 float z_depth = -0.0f;
 int windowWidth = 1000;
 int windowHeight = 1000;
 
 // std::pair<float, float> origin = std::make_pair(0.0f, 0.0f); // origen de coordenadas
-std::pair<float, float> origin = std::make_pair(-0.8f, -0.8f); // origen de coordenadas
+std::pair<float, float> origin = std::make_pair(-0.9f, -0.9f); // origen de coordenadas
 
-void transformCoordinates(float x, float y) {
+void translate(float x, float y) {
     glTranslatef(origin.first + x*cellSize, origin.second + y*cellSize, z_depth);
+}
+
+std::pair<float, float> transform(float x, float y){
+    return std::make_pair((float) (origin.first + x*cellSize), (float) (origin.second + y*cellSize) );
 }
 
 void reshape(int w, int h) {
@@ -50,15 +55,12 @@ int getBitmapStringWidth(void* font, string string) {
     for (char c : string){
         width += glutBitmapWidth(font, c);
     }
-    // for (const char* c = string; *c != '\0'; c++) {
-    //     width += glutBitmapWidth(font, *c);
-    // }
     return width;
 }
 
-void renderBitmapString(float x, float y, void* font, string string) {
+void renderBitmapString(float x, float y, string string, void* font = GLUT_BITMAP_HELVETICA_18) {
     glPushMatrix();
-    transformCoordinates(x, y);
+    translate(x, y);
 
     // Obtiene el ancho del texto en píxeles
     int textWidthPixels = getBitmapStringWidth(font, string);
@@ -83,15 +85,14 @@ void renderBitmapString(float x, float y, void* font, string string) {
 void drawSquare(float x, float y, float size) {
     glPushMatrix();
 
-    // glTranslatef(x, y, -2.0f);
-    transformCoordinates(x, y);
-    glColor3f(1.0f, 0.0f, 0.0f);  // verde
+    translate(x, y);
+    glColor3f(1.0f, 0.0f, 0.0f);
 
     glBegin(GL_QUADS);
-        glVertex3f(-size / 2, -size / 2, 0.0f);  // esquina inferior izquierda
-        glVertex3f(size / 2, -size / 2, 0.0f);   // esquina inferior derecha
-        glVertex3f(size / 2, size / 2, 0.0f);    // esquina superior derecha
-        glVertex3f(-size / 2, size / 2, 0.0f);   // esquina superior izquierda
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(size, 0.0f, 0.0f);
+        glVertex3f(size, size, 0.0f);
+        glVertex3f(0.0f, size, 0.0f);
     glEnd();
 
     glPopMatrix();
@@ -100,7 +101,7 @@ void drawSquare(float x, float y, float size) {
 void drawCircle(float x, float y, float radius, float r, float g, float b, float a) {
     glPushMatrix();
 
-    transformCoordinates(x, y);
+    translate(x, y);
     glColor4f(r, g, b, a);  
     glutSolidSphere(radius, 20, 20);
 
@@ -112,29 +113,51 @@ void drawAgent(float x, float y, float radius = cellSize/2, float sightRadius= c
     string string = std::to_string(id);
     drawCircle(x, y, sightRadius, 0.0f, 0.0f, 0.0f, 0.5f);
     drawCircle(x, y, radius,      1.0f, 0.5f, 0.0f, 1.0f);
-    renderBitmapString(x, y, GLUT_BITMAP_HELVETICA_18, string);
-    // renderBitmapString()
+    renderBitmapString(x, y, string);
 }
 
-void drawLine(float initX, float initY, float finalX, float finalY){
+void drawLine(float initX, float initY, float finalX, float finalY, float r, float g, float b, float width = 20.0f){
     glPushMatrix();
 
-    transformCoordinates(initX, initY);
-    transformCoordinates(finalX, finalY);
+    std::pair<float, float> init = transform(initX, initY);
+    std::pair<float, float> final = transform(finalX, finalY);
 
-    glColor3f(1.0f, 0.0f, 0.0f); // rojo
-    glLineWidth(20.0f); // línea de 5 píxeles de grosor
+    glColor3f(r, g, b); // rojo
+    glLineWidth(width); // línea de 5 píxeles de grosor
 
     glBegin(GL_LINES);
-        glVertex2f(-0.5f, -0.5f);
-        glVertex2f(0.5f, 0.5f);
+        glVertex2f(init.first, init.second);
+        glVertex2f(final.first, final.second);
     glEnd();
 
     glPopMatrix();
 }
 
 void drawGrid(){
+    float cellsX = windowWidth / cellSize;
+    float cellsY = windowHeight / cellSize;
 
+    drawLine(0.0f, 0.0f, cellsX, 0.0f, 0.5f, 0.5f, 0.5f);
+    drawLine(0.0f, 0.0f, 0.0f, cellsY, 0.5f, 0.5f, 0.5f);
+
+    float divisorLine = 0.3f;
+
+    if(windowHeight == windowWidth){
+        for (int i=0; i< cellsX; ++i){
+            drawLine(i, 0, i, cellsX, 0.5f, 0.5f, 0.5f, 1);
+            drawLine(0, i, cellsY, i, 0.5f, 0.5f, 0.5f, 1);
+
+            drawLine(i, divisorLine, i, -divisorLine, 0.5f, 0.5f, 0.5f, 5);
+            drawLine(divisorLine, i, -divisorLine, i, 0.5f, 0.5f, 0.5f, 5);
+
+            if (i % 5 == 0){
+                if (i!=0){
+                    renderBitmapString(-divisorLine, i, std::to_string(i));
+                }
+                renderBitmapString(i, -divisorLine, std::to_string(i));
+            }
+        }
+    }
 }
 
 void display() {
@@ -147,11 +170,9 @@ void display() {
     // Mueve la cámara hacia atrás (si quieres)
     // glTranslatef(0.0f, 0.0f, -2.0f);  // opcional, pero redundante si ya colocas la esfera en -2.0
 
+    drawGrid();
     drawSquare(0.0f, 0.0f, cellSize);
-    drawAgent(ballX, 0.0f);
-    drawAgent(ballX, 1.0f);
     drawAgent(ballX, 2.0f);
-    drawLine(0.0f, 0.0f, 0.0f, 0.0f);
     
     glDisable(GL_BLEND);  // Desactivar el blending
 
