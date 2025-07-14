@@ -1,17 +1,22 @@
-#include <iostream>
-#include <GL/freeglut.h>
-#include <utility>
-#include <iostream>
+// #include <iostream>
+// #include <GL/freeglut.h>
+// #include <utility>
+// #include <iostream>
+
+#include "glut_renderer.h"
 
 using std::string;
 
-float ballX = 0.0f;
+float ballX = 2.0f;
 float ballSpeed = 0.02f;
 
 float cellSize = 0.05f;
 float z_depth = -0.0f;
 int windowWidth = 1000;
 int windowHeight = 1000;
+
+int limitStep = 1000;
+int step = -1;
 
 // std::pair<float, float> origin = std::make_pair(0.0f, 0.0f); // origen de coordenadas
 std::pair<float, float> origin = std::make_pair(-0.9f, -0.9f); // origen de coordenadas
@@ -38,9 +43,14 @@ void reshape(int w, int h) {
 }
 
 void updateLogic() {
+    step += 1;
+    if (step>= limitStep){
+        glutLeaveMainLoop();
+    }
     // Actualiza la posición del círculo
     ballX += ballSpeed;
-    if (ballX > 1.0f || ballX < -1.0f) {
+
+    if (ballX > 3.0f || ballX < 2.0f) {
         ballSpeed = -ballSpeed;  // rebote simple
     }
 }
@@ -58,7 +68,7 @@ int getBitmapStringWidth(void* font, string string) {
     return width;
 }
 
-void renderBitmapString(float x, float y, string string, void* font = GLUT_BITMAP_HELVETICA_18) {
+void renderBitmapString(float x, float y, string string, void* font) {
     glPushMatrix();
     translate(x, y);
 
@@ -108,7 +118,7 @@ void drawCircle(float x, float y, float radius, float r, float g, float b, float
     glPopMatrix();
 }
 
-void drawAgent(float x, float y, float radius = cellSize/2, float sightRadius= cellSize){
+void drawAgent(float x, float y, float radius, float sightRadius){
     int id = -1;
     string string = std::to_string(id);
     drawCircle(x, y, sightRadius, 0.0f, 0.0f, 0.0f, 0.5f);
@@ -116,7 +126,7 @@ void drawAgent(float x, float y, float radius = cellSize/2, float sightRadius= c
     renderBitmapString(x, y, string);
 }
 
-void drawLine(float initX, float initY, float finalX, float finalY, float r, float g, float b, float width = 20.0f){
+void drawLine(float initX, float initY, float finalX, float finalY, float r, float g, float b, float width){
     glPushMatrix();
 
     std::pair<float, float> init = transform(initX, initY);
@@ -171,17 +181,40 @@ void display() {
     // glTranslatef(0.0f, 0.0f, -2.0f);  // opcional, pero redundante si ya colocas la esfera en -2.0
 
     drawGrid();
+    
     drawSquare(0.0f, 0.0f, cellSize);
+    drawSquare(1.0f, 0.0f, cellSize);
+    drawSquare(2.0f, 0.0f, cellSize);
+    drawSquare(3.0f, 0.0f, cellSize);
+    drawSquare(4.0f, 0.0f, cellSize);
+    drawSquare(5.0f, 0.0f, cellSize);
+
+    drawSquare(0.0f, 4.0f, cellSize);
+    drawSquare(1.0f, 4.0f, cellSize);
+    drawSquare(2.0f, 4.0f, cellSize);
+    drawSquare(3.0f, 4.0f, cellSize);
+    drawSquare(4.0f, 4.0f, cellSize);
+    drawSquare(5.0f, 4.0f, cellSize);
+
+    drawSquare(0.0f, 1.0f, cellSize);
+    drawSquare(0.0f, 2.0f, cellSize);
+    drawSquare(0.0f, 3.0f, cellSize);
+    drawSquare(0.0f, 4.0f, cellSize);
+
+    drawSquare(5.0f, 1.0f, cellSize);
+    drawSquare(5.0f, 2.0f, cellSize);
+    drawSquare(5.0f, 3.0f, cellSize);
+    drawSquare(5.0f, 4.0f, cellSize);
+
     drawAgent(ballX, 2.0f);
+    drawAgent(ballX, 3.0f);
     
     glDisable(GL_BLEND);  // Desactivar el blending
 
     glutSwapBuffers(); 
 }
 
-// TO DO: ENABLE DEPTH
-int main(int argc, char** argv) {
-    glutInit(&argc, argv);
+void prepareRenderer(){
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(windowWidth, windowHeight);
     if(true){
@@ -197,6 +230,29 @@ int main(int argc, char** argv) {
     // glutReshapeFunc(reshape);
     glutIdleFunc(idleFunc);
 
-    glutMainLoop();
-    return 0;
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 }
+
+// TO DO: ENABLE DEPTH
+// int main(int argc, char** argv) {
+//     glutInit(&argc, argv);
+//     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+//     glutInitWindowSize(windowWidth, windowHeight);
+//     if(true){
+//         glutCreateWindow("ORCA");
+//     }else{
+//         glutCreateWindow("C-NAV");
+//     }
+    
+//     glClearColor(0.0f, 0.3f, 0.5f, 1.0f);   // Fondo azul oscuro
+//     // glEnable(GL_DEPTH_TEST);  // habilita el depth test
+
+//     glutDisplayFunc(display);
+//     // glutReshapeFunc(reshape);
+//     glutIdleFunc(idleFunc);
+
+//     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+//     glutMainLoop();
+
+//     return 0;
+// }

@@ -5,14 +5,13 @@
       "name": "Debug C++ GLUT",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/mi_programa",
+      "program": "${workspaceFolder}/glut_renderer",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
-      "externalConsole": true,
+      "externalConsole": false,
       "MIMode": "gdb",
-      // "preLaunchTask": "Run GLUT"
     }
   ]
 }

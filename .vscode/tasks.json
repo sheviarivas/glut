@@ -7,8 +7,8 @@
             "command": "g++",
             "args": [
                 "-o",
-                "mi_programa",
-                "mi_programa.cpp",
+                "glut_renderer",
+                "glut_renderer.cpp",
                 "-lGL",
                 "-lGLU",
                 "-lglut"
@@ -24,7 +24,7 @@
         {
             "label": "Run GLUT",
             "type": "shell",
-            "command": "./mi_programa",
+            "command": "./glut_renderer",
             "problemMatcher": [
                 "$gcc"
             ]
@@ -35,11 +35,32 @@
                 "Build GLUT"
             ],
             "dependsOrder": "sequence",
-            "command": "./mi_programa",
+            "command": "./glut_renderer",
             "type": "shell",
             "problemMatcher": [
                 "$gcc"
             ]
-        }
+        },
+        {
+            "label": "Build GLUT included",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-o",
+                "including_glut_renderer",
+                "glut_renderer.cpp",
+                "including_glut_renderer.cpp",
+                "-lGL",
+                "-lGLU",
+                "-lglut"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
     ]
 }
